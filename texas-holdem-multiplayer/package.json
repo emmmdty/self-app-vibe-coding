@@ -1,0 +1,21 @@
+{
+  "name": "texas-holdem-multiplayer",
+  "version": "0.1.0",
+  "description": "Multiplayer Texas Hold'em demo with virtual chips only (educational/entertainment)",
+  "main": "src/app.js",
+  "repository": "https://github.com/ptwu/distributed-texasholdem.git",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node src/app.js",
+    "test": "jest --runInBand test/engine"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pokersolver": "^2.1.4",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

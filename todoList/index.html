@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>待办事项应用</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <p class="brand-kicker">Microsoft To Do Inspired</p>
+          <h1>我的任务</h1>
+        </div>
+
+        <div class="topbar-controls">
+          <div class="topbar-cluster">
+            <label class="control-group" for="theme-color">
+              <span>主题</span>
+              <input id="theme-color" data-testid="theme-color" type="color" value="#2f80ed" />
+            </label>
+          </div>
+
+          <div class="topbar-cluster">
+            <div class="control-group">
+              <span>终端</span>
+              <div class="viewport-switch" role="group" aria-label="终端预览切换">
+                <button type="button" class="viewport-btn" data-testid="viewport-desktop" data-viewport="desktop" aria-pressed="true">电脑</button>
+                <button type="button" class="viewport-btn" data-testid="viewport-tablet" data-viewport="tablet" aria-pressed="false">平板</button>
+                <button type="button" class="viewport-btn" data-testid="viewport-mobile" data-viewport="mobile" aria-pressed="false">手机</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="topbar-cluster">
+            <button id="notification-toggle" class="text-btn" type="button" data-testid="notification-toggle">
+              开启通知
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main id="app-frame" data-testid="app-frame" class="workspace" data-preview="desktop">
+        <aside class="sidebar">
+          <section>
+            <h2>智能列表</h2>
+            <ul id="smart-lists" class="nav-list"></ul>
+          </section>
+          <section>
+            <h2>我的列表</h2>
+            <ul id="custom-lists" class="nav-list"></ul>
+            <form id="list-form" class="list-form">
+              <input id="list-input" type="text" maxlength="30" placeholder="新建列表" />
+              <button type="submit">添加</button>
+            </form>
+          </section>
+        </aside>
+
+        <section class="task-pane">
+          <header class="pane-header">
+            <div>
+              <h2 id="current-list-title" data-testid="current-list-title">My Day</h2>
+              <p class="pane-subtitle">
+                未完成 <strong id="active-count" data-testid="active-count">0</strong>
+                · 已完成 <strong id="completed-count" data-testid="completed-count">0</strong>
+              </p>
+            </div>
+            <label class="sort-select">
+              排序
+              <select id="sort-mode">
+                <option value="created-desc">最近创建</option>
+                <option value="created-asc">最早创建</option>
+                <option value="due-asc">到期优先</option>
+              </select>
+            </label>
+          </header>
+
+          <form id="task-form" class="task-form" novalidate>
+            <input id="task-input" data-testid="task-input" type="text" maxlength="180" placeholder="添加任务" required />
+            <button id="add-task-btn" data-testid="add-task" type="submit">添加任务</button>
+          </form>
+
+          <ul id="task-list" data-testid="task-list" class="task-list" aria-label="任务列表"></ul>
+          <p id="empty-tip" class="empty-tip">当前列表还没有任务。</p>
+        </section>
+
+        <aside id="detail-pane" class="detail-pane">
+          <div id="detail-empty" class="detail-empty">选择任务查看详情</div>
+
+          <div id="detail-content" class="detail-content is-hidden">
+            <section class="detail-section detail-section-primary">
+              <label class="detail-title-row">
+                <input id="detail-completed" type="checkbox" />
+                <input id="detail-title" data-testid="detail-title" type="text" maxlength="180" />
+              </label>
+
+              <div class="detail-actions">
+                <button id="detail-important" type="button" class="chip-btn">标记重要</button>
+                <button id="detail-myday" type="button" class="chip-btn">添加到 My Day</button>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h3 class="section-label">时间与重复</h3>
+              <label class="field-row">
+                截止日期
+                <input id="detail-due-date" data-testid="detail-due-date" type="date" />
+              </label>
+
+              <label class="field-row">
+                提醒时间
+                <input id="detail-reminder" data-testid="detail-reminder" type="datetime-local" />
+              </label>
+
+              <label class="field-row">
+                重复规则
+                <select id="detail-repeat" data-testid="detail-repeat">
+                  <option value="none">不重复</option>
+                  <option value="daily">每天</option>
+                  <option value="weekdays">工作日</option>
+                  <option value="weekly">每周</option>
+                  <option value="monthly">每月</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="detail-section">
+              <h3 class="section-label">备注</h3>
+              <label class="field-row">
+                任务备注
+                <textarea id="detail-notes" rows="4" placeholder="添加备注"></textarea>
+              </label>
+            </section>
+
+            <section class="detail-section steps">
+              <h3 class="section-label">步骤</h3>
+              <ul id="steps-list"></ul>
+              <form id="step-form" class="step-form">
+                <input id="step-input" type="text" maxlength="120" placeholder="添加步骤" />
+                <button type="submit">添加</button>
+              </form>
+            </section>
+
+            <section class="detail-section detail-section-danger">
+              <button id="detail-delete" class="danger-btn" type="button">删除任务</button>
+            </section>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <section id="toast-stack" class="toast-stack" aria-live="polite"></section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

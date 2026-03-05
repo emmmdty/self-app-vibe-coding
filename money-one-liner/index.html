@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>一句话记账</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <h1>一句话记账</h1>
+        <p>一句话或语音输入自动记账，支持行内编辑、分类复核、锁定、手动新增、搜索筛选与多维导出。</p>
+      </header>
+
+      <section class="card quick-entry">
+        <h2>快速记账</h2>
+        <form id="entryForm">
+          <div class="quick-grid">
+            <input
+              id="entryInput"
+              type="text"
+              placeholder="例如：我今天早饭吃了包子，花了4块5"
+              autocomplete="off"
+              required
+            />
+            <select id="parseMode">
+              <option value="auto">解析模式：自动</option>
+              <option value="rule">解析模式：规则</option>
+              <option value="api">解析模式：API</option>
+            </select>
+            <button id="voiceInputBtn" type="button" class="ghost">语音输入</button>
+            <button type="submit">解析并记账</button>
+          </div>
+        </form>
+        <div class="inline-controls">
+          <label>
+            <input id="alwaysConfirmBeforeSave" type="checkbox" />
+            保存前总是确认
+          </label>
+          <span id="voiceStatus">语音状态：idle</span>
+        </div>
+        <p id="flash" data-tone="ok"></p>
+      </section>
+
+      <section class="card">
+        <h2>手动新增账单</h2>
+        <form id="manualEntryForm">
+          <div class="quick-grid">
+            <input id="manualDate" type="date" required />
+            <select id="manualFlow">
+              <option value="expense">支出</option>
+              <option value="income">收入</option>
+            </select>
+            <select id="manualType"></select>
+            <input id="manualAmount" type="number" min="0.01" step="0.01" placeholder="金额（元）" required />
+          </div>
+          <div class="quick-grid manual-note-row">
+            <input id="manualNote" type="text" placeholder="备注（例如：早餐）" />
+            <button type="submit">保存手动账单</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="previewPanel" class="card preview" hidden>
+        <h2 id="previewTitle">确认账单</h2>
+        <div class="preview-grid">
+          <label>
+            收支
+            <select id="previewFlow">
+              <option value="expense">支出</option>
+              <option value="income">收入</option>
+            </select>
+          </label>
+          <label>
+            类型
+            <select id="previewType"></select>
+          </label>
+          <label>
+            金额（元）
+            <input id="previewAmount" type="number" min="0.01" step="0.01" />
+          </label>
+          <label>
+            日期
+            <input id="previewDate" type="date" />
+          </label>
+          <label class="full">
+            备注
+            <input id="previewNote" type="text" />
+          </label>
+        </div>
+        <div class="preview-meta">
+          <span>解析置信度：<strong id="previewConfidence">0%</strong></span>
+          <span>提示：<strong id="previewWarnings">无</strong></span>
+          <span>来源：<strong id="previewSource">rule</strong></span>
+        </div>
+        <div class="actions">
+          <button id="previewSave" type="button">保存</button>
+          <button id="previewCancel" type="button" class="ghost">取消</button>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="card metric">
+          <h3>当前视图总收入</h3>
+          <p><span id="incomeTotal">0.00</span> 元</p>
+        </article>
+        <article class="card metric">
+          <h3>当前视图总支出</h3>
+          <p><span id="expenseTotal">0.00</span> 元</p>
+        </article>
+        <article class="card metric">
+          <h3>当前视图净结余</h3>
+          <p><span id="netTotal">0.00</span> 元</p>
+        </article>
+      </section>
+
+      <section class="grid-two">
+        <article class="card">
+          <h2>分类分布</h2>
+          <ul id="typeBreakdown" class="plain-list"></ul>
+        </article>
+        <article class="card">
+          <h2>最近趋势</h2>
+          <ul id="trendList" class="plain-list"></ul>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>搜索与筛选</h2>
+        <div class="filters-grid">
+          <label>
+            关键词
+            <input id="filterKeyword" type="text" placeholder="搜索备注、类型、原文" />
+          </label>
+          <label>
+            收支
+            <select id="filterFlow">
+              <option value="all">全部</option>
+              <option value="expense">仅支出</option>
+              <option value="income">仅收入</option>
+            </select>
+          </label>
+          <label>
+            类型
+            <select id="filterType">
+              <option value="">全部类型</option>
+            </select>
+          </label>
+          <label>
+            分类组
+            <select id="filterGroup">
+              <option value="all">全部分组</option>
+            </select>
+          </label>
+          <label>
+            复核状态
+            <select id="filterReviewStatus">
+              <option value="all">全部</option>
+              <option value="pending">待复核</option>
+              <option value="resolved">已复核</option>
+            </select>
+          </label>
+          <label>
+            起始日期
+            <input id="filterDateFrom" type="date" />
+          </label>
+          <label>
+            结束日期
+            <input id="filterDateTo" type="date" />
+          </label>
+        </div>
+        <div class="actions">
+          <button id="clearFilters" type="button" class="ghost">清空筛选</button>
+          <span id="filterSummary" class="muted">共 0 条</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>待复核队列</h2>
+        <p class="muted">用于集中处理“未分类”账单，支持批量改类并自动联动相似账单。</p>
+        <div class="actions">
+          <span id="reviewSummary" class="muted">待复核 0 条</span>
+        </div>
+        <div class="filters-grid">
+          <label>
+            目标收支
+            <select id="reviewFlow">
+              <option value="expense">支出</option>
+              <option value="income">收入</option>
+            </select>
+          </label>
+          <label>
+            目标类型
+            <select id="reviewType"></select>
+          </label>
+          <label>
+            联动策略
+            <select id="reviewSimilarMode">
+              <option value="off">仅处理勾选项</option>
+              <option value="pending_only">一并处理相似待复核项</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="reviewSelectAll" type="button" class="ghost">全选待复核</button>
+          <button id="reviewClearSelection" type="button" class="ghost">清空勾选</button>
+          <button id="reviewApplyBatch" type="button">批量应用分类</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>选中</th>
+                <th>日期</th>
+                <th>收支</th>
+                <th>当前类型</th>
+                <th>备注</th>
+                <th>金额</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="reviewQueueBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>账单明细（行内编辑）</h2>
+        <p class="muted">每行可直接改日期/收支/类型/备注/金额，点击“锁定”后该行不可编辑。转账/本金/调账不会计入收支统计。</p>
+        <div class="actions">
+          <button id="exportCsv" type="button">导出当前 CSV</button>
+          <button id="exportJson" type="button">导出当前 JSON</button>
+          <button id="exportByType" type="button" class="ghost">导出按类型汇总</button>
+          <button id="exportByDay" type="button" class="ghost">导出按日汇总</button>
+          <button id="exportByMonth" type="button" class="ghost">导出按月汇总</button>
+          <button id="exportSelectedCsv" type="button" class="ghost">导出选中 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>选中</th>
+                <th>日期</th>
+                <th>收支</th>
+                <th>流水类型</th>
+                <th>分类组</th>
+                <th>类型</th>
+                <th>备注</th>
+                <th>金额</th>
+                <th>来源</th>
+                <th>置信度</th>
+                <th>复核</th>
+                <th>锁定</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>规则中心</h2>
+        <p class="muted">你可以修改关键词和优先级，控制规则解析结果。</p>
+        <div class="rules-grid">
+          <label>
+            收入关键词（逗号分隔）
+            <textarea id="flowIncomeKeywords" rows="3"></textarea>
+          </label>
+          <label>
+            支出关键词（逗号分隔）
+            <textarea id="flowExpenseKeywords" rows="3"></textarea>
+          </label>
+          <label>
+            类型
+            <select id="ruleTypeSelect"></select>
+          </label>
+          <label>
+            该类型关键词（逗号分隔）
+            <textarea id="ruleTypeKeywords" rows="3"></textarea>
+          </label>
+          <label class="full">
+            类型优先级（从高到低，逗号分隔）
+            <textarea id="typePriorityKeywords" rows="2"></textarea>
+          </label>
+          <label class="full">
+            规则测试句子
+            <input id="ruleSampleInput" type="text" placeholder="例如：今天奶茶12" />
+          </label>
+          <p id="ruleSampleResult" class="muted full">测试结果：-</p>
+        </div>
+        <div class="actions">
+          <button id="ruleTestBtn" type="button">测试规则</button>
+          <button id="ruleSaveBtn" type="button">保存规则</button>
+          <button id="ruleResetBtn" type="button" class="ghost">恢复默认规则</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>代理与 API 设置（密钥不回显）</h2>
+        <div class="settings-grid">
+          <label>
+            语音模式
+            <select id="voiceMode">
+              <option value="auto">自动降级（优先 Web Speech）</option>
+              <option value="webspeech">仅 Web Speech</option>
+              <option value="api">仅 API 转写</option>
+            </select>
+          </label>
+          <label>
+            本地代理地址
+            <input id="proxyBaseUrl" type="text" placeholder="http://127.0.0.1:8787" />
+          </label>
+          <label>
+            供应商预设（OpenAI 风格）
+            <select id="providerPreset">
+              <option value="deepseek">DeepSeek（默认）</option>
+              <option value="openai">OpenAI</option>
+              <option value="groq">Groq</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="dashscope_intl">DashScope Intl</option>
+              <option value="dashscope_cn">DashScope CN</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label>
+            Upstream Base URL
+            <input id="upstreamBaseUrl" type="text" placeholder="https://api.deepseek.com" />
+          </label>
+          <label>
+            解析模型
+            <input id="modelName" type="text" placeholder="deepseek-chat" />
+          </label>
+          <label>
+            转写模型
+            <input id="transcribeModelName" type="text" placeholder="whisper-1" />
+          </label>
+          <label class="full">
+            更新 API Key（留空表示不修改）
+            <input
+              id="apiKeySecure"
+              type="password"
+              autocomplete="new-password"
+              spellcheck="false"
+              placeholder="输入后点击保存设置"
+            />
+          </label>
+          <p class="muted full">密钥状态：<strong id="keyConfiguredStatus">未配置</strong></p>
+          <div class="actions full">
+            <button id="saveSettings" type="button">保存设置</button>
+            <button id="checkProxy" type="button" class="ghost">检查代理连通性</button>
+            <label class="file-btn">
+              导入
+              <input id="importFile" type="file" accept=".csv,.json" />
+            </label>
+            <button id="clearAll" type="button" class="danger">清空数据</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/ui/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Texas Holdem Multiplayer (Demo)</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero panel">
+        <div class="hero-top">
+          <div>
+            <h1>多人德州扑克（演示）</h1>
+            <p class="subtle">2–10 人，虚拟筹码，同步联机，微信可转发邀请链接</p>
+          </div>
+          <div class="hero-toggles" aria-label="界面偏好">
+            <button id="rules-btn" class="chip-btn" type="button">规则 / 牌型</button>
+            <button id="sound-toggle-btn" class="chip-btn" type="button">音效：开</button>
+            <button id="fx-toggle-btn" class="chip-btn" type="button">动效：自动</button>
+          </div>
+        </div>
+        <div class="compliance">
+          仅学习/娱乐演示，使用虚拟筹码（chips），无真实货币交易。
+        </div>
+      </header>
+
+      <section class="panel" id="connect-panel">
+        <div class="section-title-row">
+          <h2>进入房间</h2>
+          <p class="hint">支持 `?roomId=` 邀请链接自动填充</p>
+        </div>
+        <div class="grid two">
+          <label>
+            昵称
+            <input id="name-input" type="text" maxlength="16" placeholder="如：玩家A" autocomplete="nickname" />
+          </label>
+          <label>
+            房间号
+            <input id="room-input" type="text" maxlength="8" placeholder="例如 ABCD" autocapitalize="characters" />
+          </label>
+        </div>
+        <div class="row wrap">
+          <button id="create-btn" class="primary" type="button">创建房间</button>
+          <button id="join-btn" type="button">加入房间</button>
+          <button id="rejoin-btn" type="button">重连房间</button>
+        </div>
+        <p class="hint" id="conn-status" aria-live="polite">未连接房间</p>
+      </section>
+
+      <section class="room-stage hidden" id="room-panel" aria-live="polite">
+        <div class="table-layout">
+          <section class="panel table-panel">
+            <div class="room-header">
+              <div>
+                <h2>房间 <span id="room-code-text">-</span></h2>
+                <p class="hint phase-chip" id="phase-text">阶段：LOBBY</p>
+                <p class="hint phase-chip session-chip" id="session-text">整局：未开始</p>
+              </div>
+              <div class="row wrap">
+                <button id="copy-link-btn" class="chip-btn" type="button">复制邀请链接</button>
+                <button id="leave-room-btn" class="danger" type="button">退出房间</button>
+              </div>
+            </div>
+
+            <div class="table-felt" id="table-felt">
+              <div class="table-felt-bg"></div>
+              <div id="players-ring" class="players-ring" aria-label="桌边座位"></div>
+              <div class="table-stats" aria-label="桌面信息">
+                <div class="stat-tile" id="pot-stat">
+                  <span>底池 Pot</span>
+                  <strong id="pot-text">0</strong>
+                </div>
+                <div class="stat-tile" id="top-bet-stat">
+                  <span>当前最高下注</span>
+                  <strong id="top-bet-text">0</strong>
+                </div>
+                <div class="stat-tile" id="turn-seat-stat">
+                  <span>轮到座位</span>
+                  <strong id="turn-seat-text">-</strong>
+                </div>
+              </div>
+
+              <div class="community-zone">
+                <div class="community-title-row">
+                  <span>公共牌</span>
+                  <span class="hint" id="table-status-line">等待房间开始</span>
+                </div>
+                <div id="community-board" class="community-board" aria-label="公共牌"></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="side-stack">
+            <section class="panel inset">
+              <h3>房间设置（房主）</h3>
+              <label>
+                初始筹码
+                <input id="starting-chips-input" type="number" min="100" max="10000" step="100" />
+              </label>
+              <div class="row wrap">
+                <button id="save-settings-btn" type="button">保存设置</button>
+                <button id="ready-btn" class="primary" type="button">Ready</button>
+                <button id="start-game-btn" type="button">开始游戏</button>
+                <button id="next-hand-btn" type="button">开始下一局</button>
+                <button id="reset-game-btn" class="warn" type="button">重新开始</button>
+              </div>
+              <div class="row wrap">
+                <button id="add-bots-btn" class="chip-btn" type="button">添加 2 个 Bot</button>
+              </div>
+              <p class="hint">盲注固定为 5 / 10（MVP）</p>
+            </section>
+
+            <section class="panel inset players-panel">
+              <div class="section-title-row">
+                <h3>玩家列表</h3>
+                <span class="hint">轮到谁 / 筹码 / 投入 / 状态</span>
+              </div>
+              <div id="players-list" class="players-list"></div>
+            </section>
+
+            <section class="panel inset action-panel" id="action-panel">
+              <h3>我的操作</h3>
+              <div id="my-status" class="hint">等待房间状态...</div>
+              <div class="row wrap action-buttons">
+                <button id="check-btn" type="button">Check</button>
+                <button id="call-btn" type="button">Call</button>
+                <button id="fold-btn" class="danger" type="button">Fold</button>
+                <button id="allin-btn" class="warn" type="button">All-in</button>
+              </div>
+              <div class="row wrap">
+                <label class="inline-field">
+                  Raise To
+                  <input id="raise-to-input" type="number" min="0" step="1" />
+                </label>
+                <button id="raise-btn" class="accent" type="button">Raise</button>
+              </div>
+            </section>
+
+            <section class="panel inset log-panel">
+              <div class="section-title-row">
+                <h3>结果 / 日志</h3>
+                <button id="log-toggle-btn" class="chip-btn" type="button">折叠日志</button>
+              </div>
+              <div id="result-box" class="result-box"></div>
+              <ol id="action-log" class="action-log"></ol>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <dialog id="rules-dialog" class="rules-dialog" aria-labelledby="rules-dialog-title">
+      <form method="dialog" class="rules-dialog__shell">
+        <header class="rules-dialog__header">
+          <div>
+            <h2 id="rules-dialog-title">德州扑克规则与牌型大小</h2>
+            <p class="hint">
+              Texas Hold'em（高牌规则）简版说明。仅用于本演示理解玩法。
+            </p>
+          </div>
+          <button id="rules-close-btn" class="chip-btn" type="submit" autofocus>关闭</button>
+        </header>
+
+        <div class="rules-dialog__body">
+          <section class="rules-card">
+            <h3>基本流程（简版）</h3>
+            <ol>
+              <li>每位玩家先发 2 张手牌（仅自己可见）。</li>
+              <li>桌面最多发 5 张公共牌：Flop（3 张）→ Turn（1 张）→ River（1 张）。</li>
+              <li>你用“2 张手牌 + 5 张公共牌”中任意 5 张组成最大牌型。</li>
+              <li>每轮可执行：Check / Call / Raise / Fold / All-in。</li>
+              <li>多人 all-in 时会按投入额自动结算主池 / 边池。</li>
+            </ol>
+          </section>
+
+          <section class="rules-card">
+            <h3>牌型大小（从大到小）</h3>
+            <ol class="hand-rank-list">
+              <li><strong>皇家同花顺</strong>：A K Q J 10 同花（例：A♠ K♠ Q♠ J♠ 10♠）</li>
+              <li><strong>同花顺</strong>：五张连续且同花</li>
+              <li><strong>四条</strong>：四张同点数（例：A A A A K）</li>
+              <li><strong>葫芦</strong>：三条 + 一对（例：K K K 9 9）</li>
+              <li><strong>同花</strong>：五张同花，不要求连续</li>
+              <li><strong>顺子</strong>：五张连续，不要求同花</li>
+              <li><strong>三条</strong>：三张同点数</li>
+              <li><strong>两对</strong>：两组对子</li>
+              <li><strong>一对</strong>：一组对子</li>
+              <li><strong>高牌</strong>：以上都没有时比最大单牌</li>
+            </ol>
+          </section>
+
+          <section class="rules-card">
+            <h3>本演示规则说明</h3>
+            <ul>
+              <li>仅使用虚拟筹码（chips），不涉及真实货币交易。</li>
+              <li>房主可设置初始筹码，并控制“开始游戏 / 开始下一局 / 重新开始”。</li>
+              <li>输光后自动转为观战，可退出房间。</li>
+            </ul>
+          </section>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/main.js"></script>
+  </body>
+</html>

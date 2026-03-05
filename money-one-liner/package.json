@@ -1,0 +1,13 @@
+{
+  "name": "money-one-liner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "proxy:start": "node server/src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
