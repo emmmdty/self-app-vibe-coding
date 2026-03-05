@@ -4,6 +4,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
 
 # Build and coverage artifacts
 dist/
@@ -16,6 +17,7 @@ coverage/
 .env
 .env.*
 !.env.example
+*.local
 *.pem
 *.key
 
@@ -24,6 +26,10 @@ __pycache__/
 *.py[cod]
 *.pyo
 .cache/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
 tmp/
 temp/
 
@@ -36,6 +42,8 @@ temp/
 .vscode/
 .idea/
 *.iml
+.trae/
+.history/
 
 # OS files
 .DS_Store

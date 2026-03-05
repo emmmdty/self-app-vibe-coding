@@ -1,0 +1,17 @@
+# Normalize text files and keep platform-specific scripts stable
+* text=auto
+
+# Prefer LF for source/docs/config files
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.py text eol=lf
+
+# Keep Windows script line endings
+*.bat text eol=crlf
+*.cmd text eol=crlf
